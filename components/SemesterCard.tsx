@@ -1,11 +1,5 @@
 import Link from "next/link";
-
-export interface Semester {
-  id: number;
-  label: string;
-  title: string;
-  subjectCount: number;
-}
+import { Semester } from "@/lib/types";
 
 export default function SemesterCard({ semester }: { semester: Semester }) {
   return (
