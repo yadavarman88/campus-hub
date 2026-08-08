@@ -1,3 +1,4 @@
+import ResourceCard from "@/components/ResourceCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { semesters } from "@/lib/data";
@@ -70,33 +71,12 @@ export default async function ResourcePage({
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {files.map((file) => (
-              <div
+              <ResourceCard
                 key={file.id}
-                className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-900"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {file.title}
-                  </h3>
-
-                  <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                    {file.type}
-                  </span>
-                </div>
-
-                <p className="mt-3 break-all text-sm text-gray-500 dark:text-gray-400">
-                  {file.file}
-                </p>
-
-                <a
-  href={file.file}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="mt-6 block w-full rounded-lg bg-gray-900 px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
->
-  Open PDF
-</a>
-              </div>
+                title={file.title}
+                type={file.type}
+                file={file.file}
+              />
             ))}
           </div>
         )}

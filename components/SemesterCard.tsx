@@ -1,25 +1,29 @@
 import Link from "next/link";
 import { Semester } from "@/lib/types";
 
-export default function SemesterCard({ semester }: { semester: Semester }) {
+export default function SemesterCard({
+  semester,
+}: {
+  semester: Semester;
+}) {
   return (
     <Link
       href={`/semester/${semester.id}`}
-      className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-900"
+      className="group flex min-h-[220px] flex-col justify-between rounded-2xl border border-gray-200 bg-white p-7 transition-all duration-200 hover:-translate-y-1 hover:border-gray-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
     >
       <div>
-        <span className="text-xs font-medium tracking-widest text-gray-400">
-          SEM {semester.label}
-        </span>
-        <h3 className="mt-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
           {semester.title}
         </h3>
-        <p className="mt-2 text-sm text-gray-400">
-          {semester.subjectCount} subjects
+
+        <p className="mt-3 text-base text-gray-500 dark:text-gray-400">
+          {semester.subjectCount} Subjects
         </p>
       </div>
-      <div className="mt-8 text-sm font-medium text-gray-600 dark:text-gray-300">
-        View subjects →
+
+      <div className="mt-10 flex items-center text-sm font-medium text-gray-600 transition-all group-hover:translate-x-1 dark:text-gray-300">
+        View subjects
+        <span className="ml-2">→</span>
       </div>
     </Link>
   );

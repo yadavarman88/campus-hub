@@ -1,14 +1,14 @@
 import { Semester, Upload } from "./types";
 
 export const semesters: Semester[] = [
-  { id: 1, label: "I", title: "Semester One", subjectCount: 6 },
-  { id: 2, label: "II", title: "Semester Two", subjectCount: 6 },
-  { id: 3, label: "III", title: "Semester Three", subjectCount: 6 },
-  { id: 4, label: "IV", title: "Semester Four", subjectCount: 6 },
-  { id: 5, label: "V", title: "Semester Five", subjectCount: 5 },
-  { id: 6, label: "VI", title: "Semester Six", subjectCount: 5 },
-  { id: 7, label: "VII", title: "Semester Seven", subjectCount: 5 },
-  { id: 8, label: "VIII", title: "Semester Eight", subjectCount: 4 },
+  { id: 1, label: "I", title: "Semester I", subjectCount: 6 },
+  { id: 2, label: "II", title: "Semester II", subjectCount: 6 },
+  { id: 3, label: "III", title: "Semester III", subjectCount: 6 },
+  { id: 4, label: "IV", title: "Semester IV", subjectCount: 6 },
+  { id: 5, label: "V", title: "Semester V", subjectCount: 5 },
+  { id: 6, label: "VI", title: "Semester VI", subjectCount: 5 },
+  { id: 7, label: "VII", title: "Semester VII", subjectCount: 5 },
+  { id: 8, label: "VIII", title: "Semester VIII", subjectCount: 4 },
 ];
 
 export const latestUploads: Upload[] = [
