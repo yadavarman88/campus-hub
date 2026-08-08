@@ -88,12 +88,14 @@ export default async function ResourcePage({
                   {file.file}
                 </p>
 
-                <button
-                  type="button"
-                  className="mt-6 w-full rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
-                >
-                  Download
-                </button>
+                <a
+  href={file.file}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-6 block w-full rounded-lg bg-gray-900 px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+>
+  Open PDF
+</a>
               </div>
             ))}
           </div>
