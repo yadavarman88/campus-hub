@@ -13,3 +13,10 @@ export interface Upload {
   type: string;
   uploadedAgo: string;
 }
+
+export interface Subject {
+  id: string;
+  semesterId: number;
+  code: string;
+  name: string;
+}
