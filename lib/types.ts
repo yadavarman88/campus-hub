@@ -20,3 +20,13 @@ export interface Subject {
   code: string;
   name: string;
 }
+
+export interface Resource {
+  id: string;
+  semesterId: number;
+  subjectId: string;
+  category: string;
+  title: string;
+  file: string;
+  type: "PDF";
+}
