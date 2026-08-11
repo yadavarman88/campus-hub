@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { semesters } from "@/lib/data";
 import { subjects } from "@/lib/subjects";
-import { getResources } from "@/lib/resources";
+import { getResources } from "@/lib/database";
 
 export default async function ResourcePage({
   params,
@@ -34,9 +34,9 @@ export default async function ResourcePage({
     );
   }
 
-  const files = getResources(
+  const files = await getResources(
     semesterNumber,
-    subjectId,
+    subject.name,
     resource
   );
 
@@ -74,8 +74,8 @@ export default async function ResourcePage({
               <ResourceCard
                 key={file.id}
                 title={file.title}
-                type={file.type}
-                file={file.file}
+                type={resourceTitle}
+                file={file.file_url}
               />
             ))}
           </div>
