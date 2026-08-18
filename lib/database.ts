@@ -1,12 +1,22 @@
 import { supabase } from "./supabase";
 
-export async function getResources() {
-  const response = await supabase
+export async function getResources(
+  semester: number,
+  subject: string,
+  category: string
+) {
+  const { data, error } = await supabase
     .from("resources")
-    .select("*");
+    .select("*")
+    .eq("semester", semester)
+    .ilike("subject", subject.trim())
+    .eq("category", category.trim())
+    .order("created_at", { ascending: true });
 
-  console.log("SUPABASE RESPONSE:");
-  console.dir(response, { depth: null });
+  if (error) {
+    console.error(error);
+    return [];
+  }
 
-  return response.data ?? [];
+  return data;
 }

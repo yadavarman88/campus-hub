@@ -23,47 +23,62 @@ export async function POST(req: Request) {
       );
     }
 
+    // Generate a unique filename
     const fileName = `${Date.now()}-${file.name}`;
 
+    // Upload to Supabase Storage
     const { error: storageError } = await supabase.storage
       .from("resources")
       .upload(fileName, file);
 
     if (storageError) {
+      console.error("Storage Error:", storageError);
+
       return NextResponse.json(
         { error: storageError.message },
         { status: 500 }
       );
     }
 
+    // Get public URL
     const {
       data: { publicUrl },
     } = supabase.storage
       .from("resources")
       .getPublicUrl(fileName);
 
-    const { error: dbError } = await supabase
+    // Insert into database
+    const { data, error: dbError } = await supabase
       .from("resources")
-      .insert({
-        semester: Number(semester),
-        subject,
-        category,
-        title,
-        file_url: publicUrl,
-      });
+      .insert([
+        {
+          semester: Number(semester),
+          subject,
+          category,
+          title,
+          file_url: publicUrl,
+          storage_path: fileName,
+        },
+      ])
+      .select();
 
     if (dbError) {
+      console.error("Database Error:", dbError);
+
       return NextResponse.json(
         { error: dbError.message },
         { status: 500 }
       );
     }
 
+    console.log("Inserted Row:", data);
+
     return NextResponse.json({
       success: true,
+      data,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Upload Error:", err);
 
     return NextResponse.json(
       { error: "Upload failed" },
