@@ -1,3 +1,5 @@
+import AuthButton from "@/components/AuthButton";
+
 export default function AdminHeader() {
   return (
     <div className="mb-10">
@@ -12,9 +14,7 @@ export default function AdminHeader() {
           </p>
         </div>
 
-        <div className="rounded-full border border-gray-700 bg-[#171A21] px-4 py-2 text-sm text-gray-300">
-          Admin
-        </div>
+        <AuthButton variant="admin" />
       </div>
     </div>
   );

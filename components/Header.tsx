@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AuthButton from "./AuthButton";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
@@ -26,6 +27,7 @@ export default function Header() {
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
+          <AuthButton />
         </div>
       </div>
     </header>

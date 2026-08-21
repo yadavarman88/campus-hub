@@ -15,15 +15,28 @@ type Resource = {
 export default function ResourceList() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function loadResources() {
       try {
         const res = await fetch("/api/resources");
         const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error || "Failed to load resources.");
+          return;
+        }
+
+        if (!Array.isArray(data)) {
+          setError("Received an invalid resource response.");
+          return;
+        }
+
         setResources(data);
       } catch (err) {
         console.error(err);
+        setError("Failed to load resources.");
       } finally {
         setLoading(false);
       }
@@ -52,7 +65,11 @@ export default function ResourceList() {
         </span>
       </div>
 
-      {resources.length === 0 ? (
+      {error ? (
+        <div className="rounded-2xl border border-red-500/50 bg-[#171A21] p-8">
+          <p className="text-red-400">{error}</p>
+        </div>
+      ) : resources.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[#2A2F3A] bg-[#171A21] p-10 text-center">
           <p className="text-gray-400">
             No resources uploaded yet.

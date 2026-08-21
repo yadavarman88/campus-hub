@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { authorizeAdmin } from "@/lib/auth";
+import { authorizeTeacher } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function GET() {
-  const authorization = await authorizeAdmin();
+  const authorization = await authorizeTeacher();
 
   if (!authorization.authorized) {
     return NextResponse.json(
@@ -16,6 +16,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("resources")
     .select("id, title, semester, subject, category, file_url")
+    .eq("created_by", authorization.user.id)
     .order("created_at", { ascending: false });
 
   if (error) {

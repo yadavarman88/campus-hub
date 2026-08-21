@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,6 +9,39 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
   try {
+    const authSupabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await authSupabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const { data: profile, error: profileError } = await authSupabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json(
+        { error: "Admin or teacher access required" },
+        { status: 403 }
+      );
+    }
+
+    if (profile.role !== "teacher" && profile.role !== "admin") {
+      return NextResponse.json(
+        { error: "Admin or teacher access required" },
+        { status: 403 }
+      );
+    }
+
     const formData = await req.formData();
 
     const file = formData.get("file") as File;
@@ -58,6 +92,7 @@ export async function POST(req: Request) {
           title,
           file_url: publicUrl,
           storage_path: fileName,
+          created_by: user.id,
         },
       ])
       .select();
