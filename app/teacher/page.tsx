@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import AuthButton from "@/components/AuthButton";
 import ResourceItem from "@/components/admin/ResourceItem";
 import UploadForm from "@/components/admin/UploadForm";
+import AnnouncementForm from "@/components/teacher/AnnouncementForm";
+import AnnouncementList from "@/components/teacher/AnnouncementList";
 
 type Resource = {
   id: string;
@@ -18,6 +20,7 @@ export default function TeacherPage() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [announcementRefreshKey, setAnnouncementRefreshKey] = useState(0);
 
   useEffect(() => {
     async function loadResources() {
@@ -92,6 +95,25 @@ export default function TeacherPage() {
         </section>
 
         <UploadForm />
+
+        <section className="mt-10">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-white">
+              Announcements
+            </h2>
+
+            <p className="mt-1 text-gray-400">
+              Create and manage course updates for your students.
+            </p>
+          </div>
+
+          <AnnouncementForm
+            onCreated={() =>
+              setAnnouncementRefreshKey((current) => current + 1)
+            }
+          />
+          <AnnouncementList refreshKey={announcementRefreshKey} />
+        </section>
       </div>
     </main>
   );
