@@ -6,6 +6,8 @@ import ResourceItem from "@/components/admin/ResourceItem";
 import UploadForm from "@/components/admin/UploadForm";
 import AnnouncementForm from "@/components/teacher/AnnouncementForm";
 import AnnouncementList from "@/components/teacher/AnnouncementList";
+import ImportantQuestionsForm from "@/components/teacher/ImportantQuestionsForm";
+import ImportantQuestionsList from "@/components/teacher/ImportantQuestionsList";
 
 type Resource = {
   id: string;
@@ -21,6 +23,8 @@ export default function TeacherPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [announcementRefreshKey, setAnnouncementRefreshKey] = useState(0);
+  const [importantQuestionsRefreshKey, setImportantQuestionsRefreshKey] =
+    useState(0);
 
   useEffect(() => {
     async function loadResources() {
@@ -113,6 +117,27 @@ export default function TeacherPage() {
             }
           />
           <AnnouncementList refreshKey={announcementRefreshKey} />
+        </section>
+
+        <section className="mt-10">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-white">
+              Important Questions
+            </h2>
+
+            <p className="mt-1 text-gray-400">
+              Upload and manage important questions for each course unit.
+            </p>
+          </div>
+
+          <ImportantQuestionsForm
+            onCreated={() =>
+              setImportantQuestionsRefreshKey((current) => current + 1)
+            }
+          />
+          <ImportantQuestionsList
+            refreshKey={importantQuestionsRefreshKey}
+          />
         </section>
       </div>
     </main>

@@ -2,6 +2,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import SemesterCard from "@/components/SemesterCard";
 import AnnouncementFeed from "@/components/student/AnnouncementFeed";
+import ImportantQuestionsBrowser from "@/components/student/ImportantQuestionsBrowser";
 import { semesters } from "@/lib/data";
 
 export default function StudentPage() {
@@ -33,6 +34,20 @@ export default function StudentPage() {
 
           <div className="mt-6">
             <AnnouncementFeed />
+          </div>
+        </section>
+
+        <section className="mt-10">
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+            Important Questions
+          </h2>
+
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Browse and download important questions for your semester.
+          </p>
+
+          <div className="mt-6">
+            <ImportantQuestionsBrowser />
           </div>
         </section>
 
