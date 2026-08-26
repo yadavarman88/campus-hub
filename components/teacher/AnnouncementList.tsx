@@ -107,12 +107,16 @@ function getSubjectLabel(subjectId: string | null) {
 
   const subject = subjects.find((item) => item.id === subjectId);
 
-  return subject ? `${subject.code} — ${subject.name}` : "Subject unavailable";
+  return subject
+    ? `${subject.code} — ${subject.name}`
+    : "Subject unavailable";
 }
 
 function validateAnnouncement(
   draft: EditableAnnouncement
-): { success: true; payload: AnnouncementPayload } | { success: false; error: string } {
+):
+  | { success: true; payload: AnnouncementPayload }
+  | { success: false; error: string } {
   const title = draft.title.trim();
   const content = draft.content.trim();
 
@@ -148,18 +152,58 @@ function validateAnnouncement(
   };
 }
 
+function EditIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="h-4 w-4"
+    >
+      <path
+        d="m14.5 6.5 3 3M5.5 18.5l.75-3.75L15.8 5.2a1.7 1.7 0 0 1 2.4 0l.6.6a1.7 1.7 0 0 1 0 2.4l-9.55 9.55-3.75.75Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function DeleteIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="h-4 w-4"
+    >
+      <path
+        d="M5.5 7.5h13M9 7.5V5.75c0-.41.34-.75.75-.75h4.5c.41 0 .75.34.75.75V7.5M8 10.5v7M12 10.5v7M16 10.5v7M7 7.5l.75 12h8.5L17 7.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function AnnouncementList({ refreshKey = 0 }: Props) {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState<ListMessage | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+
   const [draft, setDraft] = useState<EditableAnnouncement>({
     title: "",
     content: "",
     semester: "",
     subjectId: "",
   });
+
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -174,21 +218,29 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
         const response = await fetch("/api/teacher/announcements", {
           signal: controller.signal,
         });
+
         const data: unknown = await response.json().catch(() => null);
 
         if (!response.ok) {
-          throw new Error(getApiError(data, "Unable to fetch announcements."));
+          throw new Error(
+            getApiError(data, "Unable to fetch announcements.")
+          );
         }
 
         const parsedAnnouncements = parseAnnouncements(data);
 
         if (!parsedAnnouncements) {
-          throw new Error("Received an invalid announcement response.");
+          throw new Error(
+            "Received an invalid announcement response."
+          );
         }
 
         setAnnouncements(sortAnnouncements(parsedAnnouncements));
       } catch (requestError) {
-        if (requestError instanceof DOMException && requestError.name === "AbortError") {
+        if (
+          requestError instanceof DOMException &&
+          requestError.name === "AbortError"
+        ) {
           return;
         }
 
@@ -211,18 +263,26 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
 
   function beginEditing(announcement: Announcement) {
     setEditingId(announcement.id);
+
     setDraft({
       title: announcement.title,
       content: announcement.content,
       semester: announcement.semester?.toString() ?? "",
       subjectId: announcement.subject_id ?? "",
     });
+
     setMessage(null);
   }
 
   function cancelEditing() {
     setEditingId(null);
-    setDraft({ title: "", content: "", semester: "", subjectId: "" });
+
+    setDraft({
+      title: "",
+      content: "",
+      semester: "",
+      subjectId: "",
+    });
   }
 
   async function saveAnnouncement(
@@ -234,7 +294,10 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
     const validation = validateAnnouncement(draft);
 
     if (!validation.success) {
-      setMessage({ type: "error", text: validation.error });
+      setMessage({
+        type: "error",
+        text: validation.error,
+      });
       return;
     }
 
@@ -252,14 +315,19 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
           body: JSON.stringify(validation.payload),
         }
       );
+
       const data: unknown = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(getApiError(data, "Unable to update announcement."));
+        throw new Error(
+          getApiError(data, "Unable to update announcement.")
+        );
       }
 
       if (!isRecord(data) || !isAnnouncement(data.announcement)) {
-        throw new Error("Received an invalid announcement response.");
+        throw new Error(
+          "Received an invalid announcement response."
+        );
       }
 
       const updatedAnnouncement = data.announcement;
@@ -273,8 +341,13 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
           )
         )
       );
+
       cancelEditing();
-      setMessage({ type: "success", text: "Announcement updated." });
+
+      setMessage({
+        type: "success",
+        text: "Announcement updated.",
+      });
     } catch (requestError) {
       setMessage({
         type: "error",
@@ -289,7 +362,11 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
   }
 
   async function deleteAnnouncement(announcementId: string) {
-    if (!window.confirm("Delete this announcement? This action cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Delete this announcement? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
@@ -299,23 +376,33 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
     try {
       const response = await fetch(
         `/api/teacher/announcements/${announcementId}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+        }
       );
+
       const data: unknown = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(getApiError(data, "Unable to delete announcement."));
+        throw new Error(
+          getApiError(data, "Unable to delete announcement.")
+        );
       }
 
       setAnnouncements((current) =>
-        current.filter((announcement) => announcement.id !== announcementId)
+        current.filter(
+          (announcement) => announcement.id !== announcementId
+        )
       );
 
       if (editingId === announcementId) {
         cancelEditing();
       }
 
-      setMessage({ type: "success", text: "Announcement deleted." });
+      setMessage({
+        type: "success",
+        text: "Announcement deleted.",
+      });
     } catch (requestError) {
       setMessage({
         type: "error",
@@ -331,42 +418,54 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
 
   if (loading) {
     return (
-      <div className="mt-6 rounded-2xl border border-[#2A2F3A] bg-[#171A21] p-8">
-        <p className="text-gray-400">Loading announcements...</p>
+      <div className="relative mt-6 overflow-hidden rounded-3xl border border-blue-400/10 bg-white/[0.025] p-8 backdrop-blur-2xl">
+        <div className="h-4 w-40 animate-pulse rounded-full bg-white/[0.06]" />
+        <div className="mt-4 h-5 w-56 animate-pulse rounded-lg bg-white/[0.06]" />
+        <div className="mt-3 h-4 w-full max-w-2xl animate-pulse rounded-lg bg-white/[0.05]" />
       </div>
     );
   }
 
   return (
     <div className="mt-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-white">Your Announcements</h3>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-400/70">
+            Published Updates
+          </p>
 
-        <span className="rounded-full border border-[#2A2F3A] px-3 py-1 text-sm text-gray-400">
+          <h3 className="mt-1 text-xl font-semibold tracking-tight text-white">
+            Your Announcements
+          </h3>
+        </div>
+
+        <span className="rounded-full border border-blue-400/15 bg-blue-500/[0.05] px-3 py-1 text-xs font-medium text-blue-300/80">
           {announcements.length} Total
         </span>
       </div>
 
       {message && (
-        <p
+        <div
           role={message.type === "error" ? "alert" : "status"}
-          className={`mb-4 rounded-xl border p-4 ${
+          className={`mb-5 rounded-2xl border p-4 text-sm ${
             message.type === "success"
-              ? "border-green-500/50 bg-green-500/10 text-green-400"
-              : "border-red-500/50 bg-red-500/10 text-red-400"
+              ? "border-blue-400/20 bg-blue-500/[0.06] text-blue-300"
+              : "border-red-400/20 bg-red-500/[0.06] text-red-300"
           }`}
         >
           {message.text}
-        </p>
+        </div>
       )}
 
       {error ? (
-        <div className="rounded-2xl border border-red-500/50 bg-[#171A21] p-8">
-          <p className="text-red-400">{error}</p>
+        <div className="rounded-3xl border border-red-400/20 bg-red-500/[0.05] p-8 backdrop-blur-xl">
+          <p className="text-sm text-red-300">{error}</p>
         </div>
       ) : announcements.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[#2A2F3A] bg-[#171A21] p-10 text-center">
-          <p className="text-gray-400">No announcements published yet.</p>
+        <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.025] p-10 text-center backdrop-blur-xl">
+          <p className="text-sm text-gray-500">
+            No announcements published yet.
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -374,6 +473,7 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
             const isEditing = editingId === announcement.id;
             const isSaving = savingId === announcement.id;
             const isDeleting = deletingId === announcement.id;
+
             const availableSubjects = draft.semester
               ? getSubjectsBySemester(Number(draft.semester))
               : [];
@@ -381,20 +481,32 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
             return (
               <article
                 key={announcement.id}
-                className="rounded-2xl border border-[#2A2F3A] bg-[#171A21] p-5 transition hover:border-gray-500"
+                className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] p-6 shadow-[0_16px_50px_rgba(0,0,0,0.18)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-400/20 hover:bg-white/[0.045] hover:shadow-[0_20px_60px_rgba(37,99,235,0.08)]"
               >
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-24 -top-24 h-40 w-40 rounded-full bg-blue-500/[0.06] blur-[70px] transition-opacity group-hover:bg-blue-500/[0.10]"
+                />
+
                 {isEditing ? (
                   <form
-                    onSubmit={(event) => saveAnnouncement(event, announcement.id)}
-                    className="space-y-4"
+                    onSubmit={(event) =>
+                      saveAnnouncement(event, announcement.id)
+                    }
+                    className="relative space-y-5"
                   >
                     <div>
+                      <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-blue-400/70">
+                        Editing Announcement
+                      </p>
+
                       <label
                         htmlFor={`announcement-title-${announcement.id}`}
-                        className="mb-2 block text-sm text-gray-400"
+                        className="mb-2 block text-xs font-medium uppercase tracking-[0.14em] text-gray-500"
                       >
                         Title
                       </label>
+
                       <input
                         id={`announcement-title-${announcement.id}`}
                         type="text"
@@ -409,17 +521,24 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
                         maxLength={160}
                         required
                         disabled={isSaving || isDeleting}
-                        className="w-full rounded-xl border border-[#2A2F3A] bg-[#0B0F17] p-3 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400/40 focus:bg-white/[0.055] focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                       />
                     </div>
 
                     <div>
-                      <label
-                        htmlFor={`announcement-content-${announcement.id}`}
-                        className="mb-2 block text-sm text-gray-400"
-                      >
-                        Content
-                      </label>
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <label
+                          htmlFor={`announcement-content-${announcement.id}`}
+                          className="block text-xs font-medium uppercase tracking-[0.14em] text-gray-500"
+                        >
+                          Content
+                        </label>
+
+                        <span className="text-xs text-gray-700">
+                          {draft.content.length}/10000
+                        </span>
+                      </div>
+
                       <textarea
                         id={`announcement-content-${announcement.id}`}
                         value={draft.content}
@@ -434,18 +553,22 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
                         required
                         rows={6}
                         disabled={isSaving || isDeleting}
-                        className="w-full resize-y rounded-xl border border-[#2A2F3A] bg-[#0B0F17] p-3 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full resize-y rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-6 text-white outline-none transition focus:border-blue-400/40 focus:bg-white/[0.055] focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                       />
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-5 md:grid-cols-2">
                       <div>
                         <label
                           htmlFor={`announcement-semester-${announcement.id}`}
-                          className="mb-2 block text-sm text-gray-400"
+                          className="mb-2 block text-xs font-medium uppercase tracking-[0.14em] text-gray-500"
                         >
-                          Semester <span className="text-gray-500">(optional)</span>
+                          Semester{" "}
+                          <span className="normal-case tracking-normal text-gray-700">
+                            (optional)
+                          </span>
                         </label>
+
                         <select
                           id={`announcement-semester-${announcement.id}`}
                           value={draft.semester}
@@ -457,26 +580,38 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
                             }))
                           }
                           disabled={isSaving || isDeleting}
-                          className="w-full rounded-xl border border-[#2A2F3A] bg-[#0B0F17] p-3 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-gray-200 outline-none transition focus:border-blue-400/40 focus:bg-white/[0.055] focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          <option value="">All semesters</option>
-                          {Array.from({ length: 8 }, (_, index) => index + 1).map(
-                            (semesterNumber) => (
-                              <option key={semesterNumber} value={semesterNumber}>
-                                Semester {semesterNumber}
-                              </option>
-                            )
-                          )}
+                          <option value="" className="bg-[#080C13]">
+                            All semesters
+                          </option>
+
+                          {Array.from(
+                            { length: 8 },
+                            (_, index) => index + 1
+                          ).map((semesterNumber) => (
+                            <option
+                              key={semesterNumber}
+                              value={semesterNumber}
+                              className="bg-[#080C13]"
+                            >
+                              Semester {semesterNumber}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
                       <div>
                         <label
                           htmlFor={`announcement-subject-${announcement.id}`}
-                          className="mb-2 block text-sm text-gray-400"
+                          className="mb-2 block text-xs font-medium uppercase tracking-[0.14em] text-gray-500"
                         >
-                          Subject <span className="text-gray-500">(optional)</span>
+                          Subject{" "}
+                          <span className="normal-case tracking-normal text-gray-700">
+                            (optional)
+                          </span>
                         </label>
+
                         <select
                           id={`announcement-subject-${announcement.id}`}
                           value={draft.subjectId}
@@ -486,14 +621,25 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
                               subjectId: event.target.value,
                             }))
                           }
-                          disabled={!draft.semester || isSaving || isDeleting}
-                          className="w-full rounded-xl border border-[#2A2F3A] bg-[#0B0F17] p-3 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          disabled={
+                            !draft.semester ||
+                            isSaving ||
+                            isDeleting
+                          }
+                          className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-gray-200 outline-none transition focus:border-blue-400/40 focus:bg-white/[0.055] focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          <option value="">
-                            {draft.semester ? "All subjects" : "Select a semester first"}
+                          <option value="" className="bg-[#080C13]">
+                            {draft.semester
+                              ? "All subjects"
+                              : "Select a semester first"}
                           </option>
+
                           {availableSubjects.map((subject) => (
-                            <option key={subject.id} value={subject.id}>
+                            <option
+                              key={subject.id}
+                              value={subject.id}
+                              className="bg-[#080C13]"
+                            >
                               {subject.code} — {subject.name}
                             </option>
                           ))}
@@ -501,67 +647,98 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap justify-end gap-3">
+                    <div className="flex flex-wrap justify-end gap-3 border-t border-white/[0.06] pt-5">
                       <button
                         type="button"
                         onClick={cancelEditing}
                         disabled={isSaving || isDeleting}
-                        className="rounded-lg border border-gray-600 px-4 py-2 text-sm text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-2xl border border-white/10 bg-white/[0.025] px-4 py-2.5 text-sm font-medium text-gray-300 transition hover:border-white/20 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Cancel
                       </button>
+
                       <button
                         type="submit"
                         disabled={isSaving || isDeleting}
-                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-2xl border border-blue-400/20 bg-blue-500/[0.12] px-5 py-2.5 text-sm font-semibold text-blue-300 transition hover:border-blue-400/40 hover:bg-blue-500/[0.18] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {isSaving ? "Saving..." : "Save Changes"}
                       </button>
                     </div>
                   </form>
                 ) : (
-                  <>
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <h4 className="text-lg font-semibold text-white">
+                  <div className="relative">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-full border border-blue-400/15 bg-blue-500/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-blue-300/80">
+                            Announcement
+                          </span>
+
+                          <span className="text-xs text-gray-600">
+                            {formatDate(announcement.created_at)}
+                          </span>
+                        </div>
+
+                        <h4 className="mt-4 text-xl font-semibold tracking-tight text-white">
                           {announcement.title}
                         </h4>
-                        <p className="mt-1 text-sm text-gray-400">
+
+                        <p className="mt-2 text-sm text-gray-500">
                           {announcement.semester
                             ? `Semester ${announcement.semester}`
                             : "All semesters"}{" "}
-                          • {getSubjectLabel(announcement.subject_id)}
+                          <span className="text-gray-700">•</span>{" "}
+                          {getSubjectLabel(announcement.subject_id)}
                         </p>
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex shrink-0 gap-2">
                         <button
                           type="button"
-                          onClick={() => beginEditing(announcement)}
+                          onClick={() =>
+                            beginEditing(announcement)
+                          }
                           disabled={isDeleting}
-                          className="rounded-lg border border-gray-600 px-4 py-2 text-sm text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center gap-2 rounded-xl border border-blue-400/15 bg-blue-500/[0.05] px-3.5 py-2 text-sm font-medium text-blue-300 transition hover:border-blue-400/30 hover:bg-blue-500/[0.10] disabled:cursor-not-allowed disabled:opacity-50"
                         >
+                          <EditIcon />
                           Edit
                         </button>
+
                         <button
                           type="button"
-                          onClick={() => deleteAnnouncement(announcement.id)}
+                          onClick={() =>
+                            deleteAnnouncement(announcement.id)
+                          }
                           disabled={isDeleting}
-                          className="rounded-lg border border-red-500 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center gap-2 rounded-xl border border-red-400/15 bg-red-500/[0.04] px-3.5 py-2 text-sm font-medium text-red-300 transition hover:border-red-400/30 hover:bg-red-500/[0.10] disabled:cursor-not-allowed disabled:opacity-50"
                         >
+                          <DeleteIcon />
                           {isDeleting ? "Deleting..." : "Delete"}
                         </button>
                       </div>
                     </div>
 
-                    <p className="mt-4 whitespace-pre-wrap break-words text-gray-300">
-                      {announcement.content}
-                    </p>
+                    <div className="mt-5 rounded-2xl border border-white/[0.06] bg-black/[0.10] p-4">
+                      <p className="whitespace-pre-wrap break-words text-sm leading-7 text-gray-400">
+                        {announcement.content}
+                      </p>
+                    </div>
 
-                    <p className="mt-4 text-sm text-gray-500">
-                      Published {formatDate(announcement.created_at)}
-                    </p>
-                  </>
+                    <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-4">
+                      <p className="text-xs text-gray-600">
+                        Published {formatDate(announcement.created_at)}
+                      </p>
+
+                      {announcement.updated_at !==
+                        announcement.created_at && (
+                        <p className="text-xs text-blue-400/50">
+                          Updated
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 )}
               </article>
             );

@@ -57,10 +57,11 @@ export default function AuthButton({
   }
 
   const className =
-    variant === "admin"
-      ? "rounded-full border border-gray-700 bg-[#171A21] px-4 py-2 text-sm text-gray-300 transition hover:border-gray-500 hover:text-white"
-      : "rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800";
+  variant === "admin"
+    ? "rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-300 transition hover:border-blue-400/50 hover:bg-blue-500/20 hover:text-blue-200"
+    : "rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800";
 
+    
   return user ? (
     <button type="button" onClick={handleLogout} className={className}>
       Logout

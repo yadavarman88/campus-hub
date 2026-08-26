@@ -89,6 +89,30 @@ function formatDate(value: string) {
   }).format(date);
 }
 
+function AnnouncementIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="h-5 w-5"
+    >
+      <path
+        d="M6.5 5.75h11a1.75 1.75 0 0 1 1.75 1.75v8.5a1.75 1.75 0 0 1-1.75 1.75h-6.1L8 20.25v-2.5H6.5a1.75 1.75 0 0 1-1.75-1.75V7.5A1.75 1.75 0 0 1 6.5 5.75Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.5 10h7M8.5 13h5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function AnnouncementFeed() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,10 +126,13 @@ export default function AnnouncementFeed() {
         const response = await fetch("/api/student/announcements", {
           signal: controller.signal,
         });
+
         const data: unknown = await response.json().catch(() => null);
 
         if (!response.ok) {
-          throw new Error(getApiError(data, "Unable to fetch announcements."));
+          throw new Error(
+            getApiError(data, "Unable to fetch announcements.")
+          );
         }
 
         const parsedAnnouncements = parseAnnouncements(data);
@@ -116,7 +143,10 @@ export default function AnnouncementFeed() {
 
         setAnnouncements(parsedAnnouncements);
       } catch (requestError) {
-        if (requestError instanceof DOMException && requestError.name === "AbortError") {
+        if (
+          requestError instanceof DOMException &&
+          requestError.name === "AbortError"
+        ) {
           return;
         }
 
@@ -139,27 +169,41 @@ export default function AnnouncementFeed() {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
-        <p className="text-gray-500 dark:text-gray-400">
-          Loading announcements...
-        </p>
+      <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 animate-pulse rounded-2xl bg-orange-500/10" />
+
+          <div className="flex-1 space-y-3">
+            <div className="h-3 w-32 animate-pulse rounded-full bg-white/10" />
+            <div className="h-5 w-56 animate-pulse rounded-lg bg-white/[0.07]" />
+            <div className="h-3 w-full animate-pulse rounded-lg bg-white/[0.05]" />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-300 bg-red-50 p-8 dark:border-red-500/50 dark:bg-red-950/30">
-        <p className="text-red-700 dark:text-red-300">{error}</p>
+      <div className="rounded-3xl border border-red-400/20 bg-red-500/[0.06] p-8 backdrop-blur-xl">
+        <p className="text-sm font-medium text-red-300">{error}</p>
       </div>
     );
   }
 
   if (announcements.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center dark:border-gray-700 dark:bg-gray-900">
-        <p className="text-gray-500 dark:text-gray-400">
-          No announcements for your semester yet.
+      <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.025] p-12 text-center backdrop-blur-xl">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-orange-400/15 bg-orange-500/[0.07] text-orange-400">
+          <AnnouncementIcon />
+        </div>
+
+        <p className="mt-5 text-sm font-medium text-gray-300">
+          No announcements yet.
+        </p>
+
+        <p className="mt-2 text-sm text-gray-500">
+          Faculty announcements for your semester will appear here.
         </p>
       </div>
     );
@@ -170,23 +214,50 @@ export default function AnnouncementFeed() {
       {announcements.map((announcement) => (
         <article
           key={announcement.id}
-          className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+          className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-400/25 hover:bg-white/[0.05] hover:shadow-[0_18px_55px_rgba(249,115,22,0.08)]"
         >
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-400">
-            {getTargetLabel(announcement)}
-          </p>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 -top-24 h-48 w-48 rounded-full bg-orange-500/[0.07] blur-[80px] transition-all duration-300 group-hover:bg-orange-500/[0.14]"
+          />
 
-          <h3 className="mt-3 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-            {announcement.title}
-          </h3>
+          <div className="relative">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-orange-400/15 bg-orange-500/[0.07] text-orange-400">
+                <AnnouncementIcon />
+              </div>
 
-          <p className="mt-3 whitespace-pre-wrap break-words text-gray-600 dark:text-gray-300">
-            {announcement.content}
-          </p>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="rounded-full border border-orange-400/15 bg-orange-500/[0.06] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-orange-300">
+                    {getTargetLabel(announcement)}
+                  </span>
 
-          <p className="mt-5 text-sm text-gray-400">
-            Published {formatDate(announcement.created_at)}
-          </p>
+                  <span className="text-xs text-gray-600">
+                    {formatDate(announcement.created_at)}
+                  </span>
+                </div>
+
+                <h3 className="mt-4 text-xl font-semibold tracking-tight text-white">
+                  {announcement.title}
+                </h3>
+
+                <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-gray-400">
+                  {announcement.content}
+                </p>
+
+                <div className="mt-6 flex items-center justify-between border-t border-white/[0.07] pt-4">
+                  <span className="text-xs uppercase tracking-[0.14em] text-gray-600">
+                    Faculty announcement
+                  </span>
+
+                  <span className="text-xs text-gray-600">
+                    Published {formatDate(announcement.created_at)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </article>
       ))}
     </div>
