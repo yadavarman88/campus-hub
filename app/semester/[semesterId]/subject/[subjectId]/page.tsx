@@ -19,26 +19,14 @@ export default async function SubjectPage({
   params: Promise<{ semesterId: string; subjectId: string }>;
 }) {
   const { semesterId, subjectId } = await params;
-  console.log("semesterId:", semesterId);
-console.log("subjectId:", subjectId);
-  console.log("semesterId:", semesterId);
-    console.log("subjectId:", subjectId);
-    console.log("subjects:", subjects);
 
   const semesterNumber = Number(semesterId);
 
   const semester = semesters.find((s) => s.id === semesterNumber);
 
-console.log("All subject IDs:");
-subjects.forEach((s) => {
-  console.log(s.id, s.semesterId);
-});
-
-const subject = subjects.find(
-  (s) => s.id === subjectId && s.semesterId === semesterNumber
-);
-
-console.log("Found subject:", subject);
+  const subject = subjects.find(
+    (s) => s.id === subjectId && s.semesterId === semesterNumber
+  );
 
   if (!semester || !subject) {
     return (
