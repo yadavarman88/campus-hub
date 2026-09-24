@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import {
+  getBranchBySlug,
+  getSectionBySlug,
+  getSubjectsByBranchSemester,
+  isActiveSemester,
+  subjectName,
+} from "@/lib/academic-data";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,14 +52,58 @@ export async function POST(req: Request) {
     const formData = await req.formData();
 
     const file = formData.get("file") as File;
+    const branchSlug = formData.get("branch_id") as string;
+    const sectionSlug = formData.get("section_id") as string;
     const semester = formData.get("semester") as string;
-    const subject = formData.get("subject") as string;
+    const subjectId = formData.get("subject_id") as string;
     const category = formData.get("category") as string;
     const title = formData.get("title") as string;
 
     if (!file) {
       return NextResponse.json(
         { error: "No file selected" },
+        { status: 400 }
+      );
+    }
+
+    const semesterNumber = Number(semester);
+
+    const branch = branchSlug
+      ? getBranchBySlug(branchSlug)
+      : undefined;
+    const section = sectionSlug
+      ? getSectionBySlug(sectionSlug)
+      : undefined;
+
+    if (!branch) {
+      return NextResponse.json(
+        { error: "Invalid branch." },
+        { status: 400 }
+      );
+    }
+
+    if (!section || section.branchId !== branch.id) {
+      return NextResponse.json(
+        { error: "Invalid section for the selected branch." },
+        { status: 400 }
+      );
+    }
+
+    if (!Number.isInteger(semesterNumber) || !isActiveSemester(semesterNumber)) {
+      return NextResponse.json(
+        { error: "Invalid semester." },
+        { status: 400 }
+      );
+    }
+
+    const subject = getSubjectsByBranchSemester(
+      branch.id,
+      semesterNumber
+    ).find((item) => item.id === subjectId);
+
+    if (!subject) {
+      return NextResponse.json(
+        { error: "Subject must belong to the selected semester." },
         { status: 400 }
       );
     }
@@ -86,8 +137,10 @@ export async function POST(req: Request) {
       .from("resources")
       .insert([
         {
-          semester: Number(semester),
-          subject,
+          semester: semesterNumber,
+          subject: subjectName(subject),
+          subject_id: subject.id,
+          section_id: section.id,
           category,
           title,
           file_url: publicUrl,

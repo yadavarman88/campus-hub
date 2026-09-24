@@ -1,4 +1,5 @@
 import { getSubjectsBySemester } from "@/lib/subjects";
+import { getBranchBySlug, getSectionBySlug } from "@/lib/academic-data";
 
 export const IMPORTANT_QUESTIONS_BUCKET = "important-questions";
 export const SIGNED_URL_EXPIRY_SECONDS = 60;
@@ -20,6 +21,8 @@ type FileDetails = {
 export type ImportantQuestionUpload = {
   title: string;
   semester: number;
+  branchId?: string;
+  sectionId?: string;
   subjectId: string;
   unitNumber: number;
   file: File;
@@ -150,6 +153,8 @@ export async function validateImportantQuestionUpload(
   const allowedFields = new Set([
     "title",
     "semester",
+    "branch_id",
+    "section_id",
     "subject_id",
     "unit_number",
     "file",
@@ -166,6 +171,8 @@ export async function validateImportantQuestionUpload(
 
   const title = getSingleString(formData, "title");
   const semesterValue = getSingleString(formData, "semester");
+  const branchId = getSingleString(formData, "branch_id") || undefined;
+  const sectionId = getSingleString(formData, "section_id") || undefined;
   const subjectId = getSingleString(formData, "subject_id");
   const unitValue = getSingleString(formData, "unit_number");
   const file = getSingleFile(formData);
@@ -184,6 +191,28 @@ export async function validateImportantQuestionUpload(
       success: false,
       error: "Semester must be an integer between 1 and 8.",
     };
+  }
+
+  if (branchId) {
+    const branch = getBranchBySlug(branchId);
+
+    if (!branch) {
+      return {
+        success: false,
+        error: "Invalid branch.",
+      };
+    }
+  }
+
+  if (sectionId) {
+    const section = getSectionBySlug(sectionId);
+
+    if (!section || (branchId && section.branchId !== branchId)) {
+      return {
+        success: false,
+        error: "Invalid section for the selected branch.",
+      };
+    }
   }
 
   if (
@@ -236,6 +265,8 @@ export async function validateImportantQuestionUpload(
     data: {
       title,
       semester,
+      branchId,
+      sectionId,
       subjectId,
       unitNumber,
       file,

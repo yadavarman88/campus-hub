@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { subjects } from "@/lib/subjects";
+import { subjectLabel } from "@/lib/academic-data";
 
 type ImportantQuestion = {
   id: string;
@@ -72,9 +73,7 @@ function getSubjectLabel(subjectId: string, semester: number) {
     (item) => item.id === subjectId && item.semesterId === semester
   );
 
-  return subject
-    ? `${subject.code} — ${subject.name}`
-    : "Subject unavailable";
+  return subject ? subjectLabel(subject) : "Subject unavailable";
 }
 
 function formatDate(value: string) {

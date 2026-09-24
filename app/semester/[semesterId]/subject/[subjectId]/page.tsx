@@ -2,7 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { semesters } from "@/lib/data";
-import { subjects } from "@/lib/subjects";
+import { findSubjectBySlugOrAlias, subjectLabel } from "@/lib/academic-data";
 
 const resources = [
   { slug: "syllabus", label: "Syllabus" },
@@ -24,9 +24,7 @@ export default async function SubjectPage({
 
   const semester = semesters.find((s) => s.id === semesterNumber);
 
-  const subject = subjects.find(
-    (s) => s.id === subjectId && s.semesterId === semesterNumber
-  );
+  const subject = findSubjectBySlugOrAlias(semesterNumber, subjectId);
 
   if (!semester || !subject) {
     return (
@@ -48,7 +46,7 @@ export default async function SubjectPage({
         </p>
 
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-          {subject.name}
+          {subjectLabel(subject)}
         </h1>
 
         <p className="mt-2 text-gray-600 dark:text-gray-400">

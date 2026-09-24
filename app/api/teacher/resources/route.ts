@@ -15,7 +15,7 @@ export async function GET() {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("resources")
-    .select("id, title, semester, subject, category, file_url")
+    .select("id, title, semester, subject, subject_id, section_id, category, file_url")
     .eq("created_by", authorization.user.id)
     .order("created_at", { ascending: false });
 

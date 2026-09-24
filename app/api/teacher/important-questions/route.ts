@@ -99,6 +99,7 @@ export async function POST(request: Request) {
     .insert({
       title: upload.title,
       semester: upload.semester,
+      section_id: upload.sectionId ?? null,
       subject_id: upload.subjectId,
       unit_number: upload.unitNumber,
       storage_path: storagePath,

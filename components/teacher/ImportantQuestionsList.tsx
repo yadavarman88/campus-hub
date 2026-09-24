@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { subjects } from "@/lib/subjects";
+import { subjectLabel } from "@/lib/academic-data";
 
 type ImportantQuestion = {
   id: string;
@@ -74,7 +75,7 @@ function getApiError(data: unknown, fallback: string) {
 function getSubjectLabel(subjectId: string) {
   const subject = subjects.find((item) => item.id === subjectId);
 
-  return subject ? `${subject.code} — ${subject.name}` : "Subject unavailable";
+  return subject ? subjectLabel(subject) : "Subject unavailable";
 }
 
 function formatDate(value: string) {

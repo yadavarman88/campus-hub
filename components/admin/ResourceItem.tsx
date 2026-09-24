@@ -1,3 +1,5 @@
+import { getSectionBySlug } from "@/lib/academic-data";
+
 type Resource = {
   id: string;
   title: string;
@@ -5,6 +7,7 @@ type Resource = {
   subject: string;
   category: string;
   file_url: string;
+  section_id?: string | null;
 };
 
 type Props = {
@@ -12,6 +15,10 @@ type Props = {
 };
 
 export default function ResourceItem({ resource }: Props) {
+  const section = resource.section_id
+    ? getSectionBySlug(resource.section_id)
+    : undefined;
+
   return (
     <div className="group flex flex-col gap-5 rounded-2xl border border-blue-400/10 bg-blue-500/[0.04] p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-400/25 hover:bg-blue-500/[0.07] hover:shadow-[0_16px_50px_rgba(37,99,235,0.12)] sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
@@ -29,6 +36,12 @@ export default function ResourceItem({ resource }: Props) {
               Semester {resource.semester} · {resource.subject} ·{" "}
               {resource.category}
             </p>
+
+            {section && (
+              <p className="mt-1 text-xs text-gray-500">
+                Section: {section.name}
+              </p>
+            )}
           </div>
         </div>
       </div>

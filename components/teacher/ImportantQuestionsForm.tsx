@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { getSubjectsBySemester } from "@/lib/subjects";
+import {
+  getBranches,
+  getSectionsByBranch,
+  subjectLabel,
+} from "@/lib/academic-data";
 
 type FormMessage = {
   type: "success" | "error";
@@ -57,13 +62,19 @@ function UploadIcon() {
 }
 
 export default function ImportantQuestionsForm({ onCreated }: Props) {
+  const branches = getBranches();
+
   const [title, setTitle] = useState("");
+  const [branchId, setBranchId] = useState(branches[0]?.slug ?? "");
+  const [sectionId, setSectionId] = useState("");
   const [semester, setSemester] = useState("");
   const [subjectId, setSubjectId] = useState("");
   const [unitNumber, setUnitNumber] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<FormMessage | null>(null);
+
+  const branchSections = branchId ? getSectionsByBranch(branchId) : [];
 
   const availableSubjects = semester
     ? getSubjectsBySemester(Number(semester))
@@ -82,10 +93,17 @@ export default function ImportantQuestionsForm({ onCreated }: Props) {
       return;
     }
 
-    if (!semester || !subjectId || !unitNumber || !file) {
+    if (
+      !branchId ||
+      !sectionId ||
+      !semester ||
+      !subjectId ||
+      !unitNumber ||
+      !file
+    ) {
       setMessage({
         type: "error",
-        text: "Choose a semester, subject, unit, and file before uploading.",
+        text: "Choose a branch, section, semester, subject, unit, and file before uploading.",
       });
       return;
     }
@@ -95,6 +113,8 @@ export default function ImportantQuestionsForm({ onCreated }: Props) {
 
     const formData = new FormData();
     formData.append("title", trimmedTitle);
+    formData.append("branch_id", branchId);
+    formData.append("section_id", sectionId);
     formData.append("semester", semester);
     formData.append("subject_id", subjectId);
     formData.append("unit_number", unitNumber);
@@ -115,6 +135,7 @@ export default function ImportantQuestionsForm({ onCreated }: Props) {
       }
 
       setTitle("");
+      setSectionId("");
       setSemester("");
       setSubjectId("");
       setUnitNumber("");
@@ -165,8 +186,8 @@ export default function ImportantQuestionsForm({ onCreated }: Props) {
             </h3>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-              Upload a PDF or image and organise it by semester, subject,
-              and unit.
+              Upload a PDF or image and organise it by branch, section,
+              semester, subject, and unit.
             </p>
           </div>
         </div>
@@ -194,6 +215,83 @@ export default function ImportantQuestionsForm({ onCreated }: Props) {
             />
           </div>
 
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <label
+                htmlFor="important-question-branch"
+                className="mb-2 block text-xs font-medium uppercase tracking-[0.14em] text-gray-500"
+              >
+                Branch
+              </label>
+
+              <select
+                id="important-question-branch"
+                value={branchId}
+                onChange={(event) => {
+                  setBranchId(event.target.value);
+                  setSectionId("");
+                  setSemester("");
+                  setSubjectId("");
+                }}
+                required
+                disabled={loading}
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-gray-200 outline-none backdrop-blur-xl transition focus:border-blue-400/40 focus:bg-white/[0.055] focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {branches.length === 0 ? (
+                  <option value="" className="bg-[#080C13]">
+                    No branches available
+                  </option>
+                ) : (
+                  branches.map((branch) => (
+                    <option
+                      key={branch.id}
+                      value={branch.slug}
+                      className="bg-[#080C13]"
+                    >
+                      {branch.code} — {branch.name}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="important-question-section"
+                className="mb-2 block text-xs font-medium uppercase tracking-[0.14em] text-gray-500"
+              >
+                Section
+              </label>
+
+              <select
+                id="important-question-section"
+                value={sectionId}
+                onChange={(event) => {
+                  setSectionId(event.target.value);
+                  setSemester("");
+                  setSubjectId("");
+                }}
+                required
+                disabled={!branchId || branchSections.length === 0 || loading}
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-gray-200 outline-none backdrop-blur-xl transition focus:border-blue-400/40 focus:bg-white/[0.055] focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <option value="" className="bg-[#080C13]">
+                  Select a section
+                </option>
+
+                {branchSections.map((section) => (
+                  <option
+                    key={section.id}
+                    value={section.slug}
+                    className="bg-[#080C13]"
+                  >
+                    {section.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div className="grid gap-5 md:grid-cols-3">
             <div>
               <label
@@ -211,7 +309,7 @@ export default function ImportantQuestionsForm({ onCreated }: Props) {
                   setSubjectId("");
                 }}
                 required
-                disabled={loading}
+                disabled={!sectionId || loading}
                 className="w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-gray-200 outline-none backdrop-blur-xl transition focus:border-blue-400/40 focus:bg-white/[0.055] focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <option value="" className="bg-[#080C13]">
@@ -260,7 +358,7 @@ export default function ImportantQuestionsForm({ onCreated }: Props) {
                     value={subject.id}
                     className="bg-[#080C13]"
                   >
-                    {subject.code} — {subject.name}
+                    {subjectLabel(subject)}
                   </option>
                 ))}
               </select>

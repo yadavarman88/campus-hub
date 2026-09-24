@@ -24,11 +24,11 @@ export default function Hero() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3 text-sm text-gray-500 dark:text-gray-400">
-            <span>8 Semesters</span>
+            <span>ECE</span>
             <span>•</span>
-            <span>50+ Subjects</span>
+            <span>Semester 5</span>
             <span>•</span>
-            <span>Notes & PYQs</span>
+            <span>6 Subjects</span>
           </div>
         </div>
       </div>

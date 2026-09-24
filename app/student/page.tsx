@@ -1,9 +1,8 @@
+import Link from "next/link";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import SemesterCard from "@/components/SemesterCard";
 import AnnouncementFeed from "@/components/student/AnnouncementFeed";
 import ImportantQuestionsBrowser from "@/components/student/ImportantQuestionsBrowser";
-import { semesters } from "@/lib/data";
 
 export default function StudentPage() {
   return (
@@ -124,19 +123,68 @@ export default function StudentPage() {
               <span className="h-8 w-1 rounded-full bg-orange-500" />
 
               <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Explore Semesters
+                Explore Resources
               </h2>
             </div>
 
             <p className="ml-4 text-sm leading-6 text-gray-500">
-              Browse subjects and resources by semester.
+              Browse subjects and resources by branch, section, and semester.
             </p>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {semesters.map((semester) => (
-              <SemesterCard key={semester.id} semester={semester} />
-            ))}
+            <Link
+              href="/explore"
+              className="group relative flex min-h-[220px] flex-col justify-between overflow-hidden rounded-3xl border border-orange-400/15 bg-white/[0.035] p-7 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-orange-400/30 hover:bg-orange-500/[0.05] hover:shadow-[0_20px_60px_rgba(249,115,22,0.12)]"
+            >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-orange-500/[0.10] blur-[70px] transition-opacity duration-300 group-hover:bg-orange-500/[0.18]"
+              />
+
+              <div className="relative">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-400/80">
+                    ECE
+                  </span>
+
+                  <span className="text-xs font-medium text-gray-600 transition-colors duration-300 group-hover:text-orange-400">
+                    Semester 5
+                  </span>
+                </div>
+
+                <h3 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-white transition-colors duration-300 group-hover:text-orange-50">
+                  Explore
+                </h3>
+
+                <p className="mt-4 text-sm leading-6 text-gray-500">
+                  Find notes, PYQs, syllabus and lab manuals for your section.
+                </p>
+              </div>
+
+              <div className="relative mt-8 flex items-center justify-between border-t border-white/[0.08] pt-5">
+                <span className="text-sm font-medium text-gray-400 transition-colors duration-300 group-hover:text-white">
+                  Start exploring
+                </span>
+
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-gray-400 transition-all duration-300 group-hover:border-orange-400/30 group-hover:bg-orange-500/10 group-hover:text-orange-400">
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                  >
+                    <path
+                      d="M4 10h11M11 5l5 5-5 5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              </div>
+            </Link>
           </div>
         </section>
       </section>

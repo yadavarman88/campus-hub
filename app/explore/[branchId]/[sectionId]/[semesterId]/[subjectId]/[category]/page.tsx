@@ -1,48 +1,72 @@
+import Link from "next/link";
 import ResourceCard from "@/components/ResourceCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { semesters } from "@/lib/data";
 import {
-  findSubjectBySlugOrAlias,
+  getBranchBySlug,
+  getSectionBySlug,
+  isActiveSemester,
+  getSubjectBySemesterAndId,
   subjectLabel,
-  subjectName,
 } from "@/lib/academic-data";
-import { getResources } from "@/lib/database";
+import { getResourcesForExplore } from "@/lib/database";
 
-export default async function ResourcePage({
+const validCategories = new Set([
+  "syllabus",
+  "notes",
+  "previous-year-papers",
+  "important-questions",
+  "important-topics",
+  "lab-manual",
+]);
+
+export default async function ExploreCategoryPage({
   params,
 }: {
   params: Promise<{
+    branchId: string;
+    sectionId: string;
     semesterId: string;
     subjectId: string;
-    resource: string;
+    category: string;
   }>;
 }) {
-  const { semesterId, subjectId, resource } = await params;
+  const { branchId, sectionId, semesterId, subjectId, category } =
+    await params;
 
+  const branch = getBranchBySlug(branchId);
+  const section = getSectionBySlug(sectionId);
   const semesterNumber = Number(semesterId);
+  const semesterIsValid =
+    Number.isInteger(semesterNumber) && isActiveSemester(semesterNumber);
+  const subject = semesterIsValid
+    ? getSubjectBySemesterAndId(semesterNumber, subjectId)
+    : undefined;
 
-  const semester = semesters.find((s) => s.id === semesterNumber);
-
-  const subject = findSubjectBySlugOrAlias(semesterNumber, subjectId);
-
-  if (!semester || !subject) {
+  if (
+    !branch ||
+    !section ||
+    section.branchId !== branch.id ||
+    !subject ||
+    !validCategories.has(category)
+  ) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-          Resource not found
+          Category not found
         </h1>
       </main>
     );
   }
 
-  const files = await getResources(
+  const files = await getResourcesForExplore(
     semesterNumber,
-    subjectName(subject),
-    resource
+    subject.id,
+    section.id,
+    category
   );
 
-  const resourceTitle = resource
+  const resourceTitle = category
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
@@ -53,7 +77,8 @@ export default async function ResourcePage({
 
       <section className="mx-auto max-w-6xl px-6 py-14">
         <p className="text-xs font-medium tracking-widest text-gray-400">
-          {subject.code}
+          {branch.code.toUpperCase()} · {section.name.toUpperCase()} ·
+          SEMESTER {semesterNumber} · {subject.code}
         </p>
 
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
@@ -67,7 +92,7 @@ export default async function ResourcePage({
         {files.length === 0 ? (
           <div className="mt-10 rounded-xl border border-dashed border-gray-300 p-8 text-center dark:border-gray-700">
             <p className="text-gray-500 dark:text-gray-400">
-              No resources available.
+              No resources available yet.
             </p>
           </div>
         ) : (
@@ -82,6 +107,13 @@ export default async function ResourcePage({
             ))}
           </div>
         )}
+
+        <Link
+          href={`/explore/${branch.slug}/${section.slug}/${semesterNumber}/${subject.id}`}
+          className="mt-8 inline-block text-sm font-medium text-gray-500 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+        >
+          ← Back to {subjectLabel(subject)}
+        </Link>
       </section>
 
       <Footer />

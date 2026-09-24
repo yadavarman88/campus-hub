@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getSubjectsBySemester } from "@/lib/subjects";
+import { subjectLabel } from "@/lib/academic-data";
 
 type AnnouncementPayload = {
   title: string;
@@ -323,7 +324,7 @@ export default function AnnouncementForm({ onCreated }: Props) {
                     value={subject.id}
                     className="bg-[#080C13]"
                   >
-                    {subject.code} — {subject.name}
+                    {subjectLabel(subject)}
                   </option>
                 ))}
               </select>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { semesters } from "@/lib/data";
-import { getSubjectsBySemester } from "@/lib/subjects";
+import { getSubjectsByBranchSemester, subjectLabel } from "@/lib/academic-data";
 
 export default async function SemesterPage({
   params,
@@ -24,7 +24,7 @@ export default async function SemesterPage({
     );
   }
 
-  const semesterSubjects = getSubjectsBySemester(semesterNumber);
+  const semesterSubjects = getSubjectsByBranchSemester("ece", semesterNumber);
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -44,21 +44,29 @@ export default async function SemesterPage({
         </p>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {semesterSubjects.map((subject) => (
-            <Link
-              key={subject.id}
-              href={`/semester/${semesterNumber}/subject/${subject.id}`}
-              className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-900"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                {subject.name}
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                {subject.code}
+          {semesterSubjects.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center dark:border-gray-700">
+              <p className="text-gray-500 dark:text-gray-400">
+                No subjects are available for this semester yet.
               </p>
-            </Link>
-          ))}
+            </div>
+          ) : (
+            semesterSubjects.map((subject) => (
+              <Link
+                key={subject.id}
+                href={`/semester/${semesterNumber}/subject/${subject.id}`}
+                className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-900"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  {subjectLabel(subject)}
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  {subject.code}
+                </p>
+              </Link>
+            ))
+          )}
         </div>
       </section>
 

@@ -19,6 +19,22 @@ export interface Subject {
   semesterId: number;
   code: string;
   name: string;
+  /** Legacy slugs that used to identify this subject (e.g. "digital-communication"). */
+  aliases?: string[];
+}
+
+export interface Branch {
+  id: string;
+  name: string;
+  code: string;
+  slug: string;
+}
+
+export interface Section {
+  id: string;
+  branchId: string;
+  name: string;
+  slug: string;
 }
 
 export interface Resource {

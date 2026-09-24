@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { subjects } from "@/lib/subjects";
+import { subjectLabel } from "@/lib/academic-data";
 
 type Announcement = {
   id: string;
@@ -72,7 +73,7 @@ function getTargetLabel(announcement: Announcement) {
   );
 
   return subject
-    ? `Semester ${announcement.semester} • ${subject.code} — ${subject.name}`
+    ? `Semester ${announcement.semester} • ${subjectLabel(subject)}`
     : `Semester ${announcement.semester} • Subject`;
 }
 

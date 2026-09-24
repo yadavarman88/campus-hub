@@ -1,16 +1,43 @@
 "use client";
 
 import { useState } from "react";
+import {
+  getActiveSemestersForBranch,
+  getBranches,
+  getSectionsByBranch,
+  getSubjectsByBranchSemester,
+  subjectLabel,
+  subjectName,
+} from "@/lib/academic-data";
 
 export default function UploadForm() {
-  const [semester, setSemester] = useState("5");
-  const [subject, setSubject] = useState("digital communication");
+  const branches = getBranches();
+
+  const [branchId, setBranchId] = useState(
+    branches[0]?.slug ?? ""
+  );
+  const [sectionId, setSectionId] = useState("");
+  const [semester, setSemester] = useState("");
+  const [subjectId, setSubjectId] = useState("");
   const [category, setCategory] = useState("notes");
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const branchSections = branchId
+    ? getSectionsByBranch(branchId)
+    : [];
+  const activeSemesters = branchId
+    ? getActiveSemestersForBranch(branchId)
+    : [];
+  const selectedSubject =
+    semester && subjectId
+      ? getSubjectsByBranchSemester(branchId, Number(semester)).find(
+          (subject) => subject.id === subjectId
+        )
+      : undefined;
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
@@ -22,13 +49,30 @@ export default function UploadForm() {
       return;
     }
 
+    if (!branchId || !sectionId || !semester || !subjectId) {
+      setMessage(
+        "Choose a branch, section, semester, and subject before uploading."
+      );
+      return;
+    }
+
+    if (!selectedSubject) {
+      setMessage(
+        "The selected subject is not available for this semester."
+      );
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
     const formData = new FormData();
 
+    formData.append("branch_id", branchId);
+    formData.append("section_id", sectionId);
     formData.append("semester", semester);
-    formData.append("subject", subject);
+    formData.append("subject_id", subjectId);
+    formData.append("subject", subjectName(selectedSubject));
     formData.append("category", category);
     formData.append("title", title);
     formData.append("file", file);
@@ -44,6 +88,7 @@ export default function UploadForm() {
       if (res.ok) {
         setMessage("Upload successful.");
         setTitle("");
+        setCategory("notes");
         setFile(null);
       } else {
         setMessage(data.error || "Upload failed.");
@@ -56,7 +101,7 @@ export default function UploadForm() {
   }
 
   const inputClass =
-    "w-full rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 py-3 text-sm text-white outline-none transition placeholder:text-gray-600 hover:border-blue-400/20 focus:border-blue-400/40 focus:bg-blue-500/[0.04] focus:ring-2 focus:ring-blue-500/10";
+    "w-full rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 py-3 text-sm text-white outline-none transition placeholder:text-gray-600 hover:border-blue-400/20 focus:border-blue-400/40 focus:bg-blue-500/[0.04] focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-white/[0.08]";
 
   return (
     <section className="mt-10 overflow-hidden rounded-3xl border border-blue-400/[0.12] bg-gradient-to-br from-blue-500/[0.07] via-white/[0.025] to-transparent p-6 shadow-[0_20px_70px_rgba(0,0,0,0.25)] backdrop-blur-2xl sm:p-8">
@@ -87,6 +132,68 @@ export default function UploadForm() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid gap-5 md:grid-cols-3">
+          {/* Branch */}
+          <div>
+            <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">
+              Branch
+            </label>
+
+            <select
+              value={branchId}
+              onChange={(e) => {
+                setBranchId(e.target.value);
+                setSectionId("");
+                setSemester("");
+                setSubjectId("");
+              }}
+              className={inputClass}
+            >
+              {branches.length === 0 ? (
+                <option value="" className="bg-[#0B0F17]">
+                  No branches available
+                </option>
+              ) : (
+                branches.map((branch) => (
+                  <option
+                    key={branch.id}
+                    value={branch.slug}
+                    className="bg-[#0B0F17]"
+                  >
+                    {branch.code} — {branch.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+
+          {/* Section */}
+          <div>
+            <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">
+              Section
+            </label>
+
+            <select
+              value={sectionId}
+              onChange={(e) => setSectionId(e.target.value)}
+              disabled={!branchId || branchSections.length === 0}
+              className={inputClass}
+            >
+              <option value="" className="bg-[#0B0F17]">
+                Select a section
+              </option>
+
+              {branchSections.map((section) => (
+                <option
+                  key={section.id}
+                  value={section.slug}
+                  className="bg-[#0B0F17]"
+                >
+                  {section.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Semester */}
           <div>
             <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -95,10 +202,26 @@ export default function UploadForm() {
 
             <select
               value={semester}
-              onChange={(e) => setSemester(e.target.value)}
+              onChange={(e) => {
+                setSemester(e.target.value);
+                setSubjectId("");
+              }}
+              disabled={!sectionId || activeSemesters.length === 0}
               className={inputClass}
             >
-              <option value="5">Semester 5</option>
+              <option value="" className="bg-[#0B0F17]">
+                Select a semester
+              </option>
+
+              {activeSemesters.map((semesterNumber) => (
+                <option
+                  key={semesterNumber}
+                  value={semesterNumber}
+                  className="bg-[#0B0F17]"
+                >
+                  Semester {semesterNumber}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -109,13 +232,29 @@ export default function UploadForm() {
             </label>
 
             <select
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              value={subjectId}
+              onChange={(e) => setSubjectId(e.target.value)}
+              disabled={!semester}
               className={inputClass}
             >
-              <option value="digital communication">
-                Digital Communication
+              <option value="" className="bg-[#0B0F17]">
+                {semester
+                  ? "Select a subject"
+                  : "Select a semester first"}
               </option>
+
+              {getSubjectsByBranchSemester(
+                branchId,
+                Number(semester)
+              ).map((subject) => (
+                <option
+                  key={subject.id}
+                  value={subject.id}
+                  className="bg-[#0B0F17]"
+                >
+                  {subjectLabel(subject)}
+                </option>
+              ))}
             </select>
           </div>
 

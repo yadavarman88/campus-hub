@@ -1,6 +1,12 @@
 import { Subject } from "./types";
+import { subjects as canonicalSubjects } from "./academic-data";
 
-export const subjects: Subject[] = [
+// Subject catalog used by announcement and important-question features.
+// Semester 5 uses the canonical subjects from academic-data. Semesters 1-4 and
+// 6-8 keep their pre-existing catalog so existing announcements, important
+// questions, and student delivery keep working for all semesters. ACTIVE_SEMESTERS
+// only controls the explore/curriculum UI, not this functionality.
+const legacySubjects: Subject[] = [
   // Semester 1
   { id: "applied-mathematics-1", semesterId: 1, code: "ECE-101", name: "Applied Mathematics I" },
   { id: "applied-physics", semesterId: 1, code: "ECE-102", name: "Applied Physics" },
@@ -33,13 +39,6 @@ export const subjects: Subject[] = [
   { id: "probability-and-random-process", semesterId: 4, code: "ECE-259", name: "Probability & Random Process" },
   { id: "analog-electronics-2", semesterId: 4, code: "ECE-261", name: "Analog Electronics II" },
 
-  // Semester 5
-  { id: "digital-communication", semesterId: 5, code: "ECE-301", name: "Digital Communication" },
-  { id: "digital-signal-processing", semesterId: 5, code: "ECE-303", name: "Digital Signal Processing" },
-  { id: "antenna-and-wave-propagation", semesterId: 5, code: "ECE-305", name: "Antenna & Wave Propagation" },
-  { id: "microwave-engineering", semesterId: 5, code: "ECE-307", name: "Microwave Engineering" },
-  { id: "computer-networks", semesterId: 5, code: "ECE-309", name: "Computer Networks" },
-
   // Semester 6
   { id: "vlsi-design", semesterId: 6, code: "ECE-351", name: "VLSI Design" },
   { id: "optical-fiber-communication", semesterId: 6, code: "ECE-353", name: "Optical Fiber Communication" },
@@ -60,6 +59,8 @@ export const subjects: Subject[] = [
   { id: "industrial-training", semesterId: 8, code: "ECE-455", name: "Industrial Training" },
   { id: "professional-ethics", semesterId: 8, code: "ECE-457", name: "Professional Ethics" },
 ];
+
+export const subjects: Subject[] = [...legacySubjects, ...canonicalSubjects];
 
 export function getSubjectsBySemester(semesterId: number): Subject[] {
   return subjects.filter((subject) => subject.semesterId === semesterId);

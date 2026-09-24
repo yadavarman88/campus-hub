@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getSubjectsBySemester, subjects } from "@/lib/subjects";
+import { subjectLabel } from "@/lib/academic-data";
 
 type Announcement = {
   id: string;
@@ -107,9 +108,7 @@ function getSubjectLabel(subjectId: string | null) {
 
   const subject = subjects.find((item) => item.id === subjectId);
 
-  return subject
-    ? `${subject.code} — ${subject.name}`
-    : "Subject unavailable";
+  return subject ? subjectLabel(subject) : "Subject unavailable";
 }
 
 function validateAnnouncement(
@@ -640,7 +639,7 @@ export default function AnnouncementList({ refreshKey = 0 }: Props) {
                               value={subject.id}
                               className="bg-[#080C13]"
                             >
-                              {subject.code} — {subject.name}
+                              {subjectLabel(subject)}
                             </option>
                           ))}
                         </select>

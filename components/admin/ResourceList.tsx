@@ -10,6 +10,7 @@ type Resource = {
   subject: string;
   category: string;
   file_url: string;
+  section_id?: string | null;
 };
 
 export default function ResourceList() {
